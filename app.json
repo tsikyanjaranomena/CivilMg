@@ -8,9 +8,12 @@
     "scheme": "civilmg",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.proxiatech.civilmg",
+      "supportsTablet": false
     },
     "android": {
+      "package": "com.proxiatech.civilmg",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -32,7 +35,24 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "CivilMg utilise votre position pour enregistrer les coordonnées GPS de votre adresse, afin de faciliter la visite de vérification à domicile."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "CivilMg a besoin d'accéder à vos photos pour joindre des pièces à votre dossier.",
+          "cameraPermission": "CivilMg a besoin d'accéder à l'appareil photo pour photographier vos pièces justificatives."
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-sharing",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

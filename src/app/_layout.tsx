@@ -1,18 +1,39 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { BandeauHorsLigne } from '@/components/ui/BandeauHorsLigne';
+import { useFileEnvoiAutomatique } from '@/hooks/useFileEnvoiAutomatique';
+import { demarrerEcouteSession } from '@/lib/auth/sessionListener';
+import { enregistrerGestionnairesFileEnvoi } from '@/lib/enregistrerGestionnairesFileEnvoi';
+import { persistOptions } from '@/lib/queryPersistence';
 
-SplashScreen.preventAutoHideAsync();
+enregistrerGestionnairesFileEnvoi();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+// Une seule instance de QueryClient pour toute l'app — pas de re-création à
+// chaque rendu du layout racine.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Connexions lentes/intermittentes attendues sur le terrain : on évite
+      // de re-fetcher trop agressivement.
+      staleTime: 30_000,
+      retry: 2,
+    },
+  },
+});
+
+export default function RootLayout() {
+  useEffect(() => demarrerEcouteSession(), []);
+  useFileEnvoiAutomatique();
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+      <StatusBar style="auto" />
+      <BandeauHorsLigne />
+      <Stack screenOptions={{ headerShown: false }} />
+    </PersistQueryClientProvider>
   );
 }

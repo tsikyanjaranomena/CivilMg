@@ -1,0 +1,43 @@
+{
+  "commun": {
+    "annuler": "Annuler",
+    "confirmer": "Confirmer",
+    "enregistrer": "Enregistrer",
+    "retour": "Retour",
+    "chargement": "Chargement…",
+    "erreurGenerique": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "statuts": {
+    "BROUILLON": "Brouillon",
+    "SOUMIS": "Reçu",
+    "PIECES_A_COMPLETER": "Pièces à compléter",
+    "VISITE_PLANIFIEE": "Visite planifiée",
+    "VISITE_A_REPLANIFIER": "Visite à replanifier",
+    "EN_TRAITEMENT": "En cours de traitement",
+    "EN_VALIDATION": "En validation",
+    "PRET": "Prêt à retirer",
+    "LIVRE": "Livré",
+    "REJETE": "Rejeté",
+    "ANNULE": "Annulé"
+  },
+  "statutsDescriptionClient": {
+    "BROUILLON": "Votre demande n'a pas encore été envoyée.",
+    "SOUMIS": "Votre demande a été reçue et va être examinée.",
+    "PIECES_A_COMPLETER": "Des pièces manquantes ou à corriger sont nécessaires.",
+    "VISITE_PLANIFIEE": "Un agent du service viendra vérifier votre dossier à domicile.",
+    "VISITE_A_REPLANIFIER": "La visite doit être reprogrammée.",
+    "EN_TRAITEMENT": "Votre dossier est en cours de traitement.",
+    "EN_VALIDATION": "Votre dossier est en cours de validation finale.",
+    "PRET": "Votre acte est prêt. Vous pouvez venir le retirer.",
+    "LIVRE": "Votre acte vous a été remis.",
+    "REJETE": "Votre demande a été rejetée.",
+    "ANNULE": "Votre demande a été annulée."
+  },
+  "horsLigne": {
+    "bandeau": "Mode hors ligne — vos actions seront envoyées au retour du réseau"
+  },
+  "profil": {
+    "langue": "Langue",
+    "langueAVenir": "(bientôt disponible)"
+  }
+}
