@@ -1,8 +1,9 @@
+import { Alert } from '@/lib/alerte';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BarreProgression } from '@/components/nouvelle-demande/BarreProgression';
 import { Bouton } from '@/components/ui/Bouton';

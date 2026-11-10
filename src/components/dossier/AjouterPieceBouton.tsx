@@ -1,5 +1,5 @@
+import { Alert } from '@/lib/alerte';
 import * as ImagePicker from 'expo-image-picker';
-import { Alert } from 'react-native';
 
 import { Bouton } from '@/components/ui/Bouton';
 import { useAjouterDocument } from '@/hooks/mutations/useAjouterDocument';

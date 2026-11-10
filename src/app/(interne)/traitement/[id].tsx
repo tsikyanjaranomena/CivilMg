@@ -1,10 +1,12 @@
+import { formaterDateFr } from '@/domain/dates';
+import { Alert } from '@/lib/alerte';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Timeline } from '@/components/dossier/Timeline';
 import { BadgeStatut } from '@/components/ui/BadgeStatut';
@@ -173,7 +175,7 @@ export default function EcranFicheTraitement() {
             {personne.nom} {personne.prenoms ?? ''}
           </Text>
           <Text style={{ color: theme.textSecondary }}>
-            {personne.date_evenement} — {personne.lieu_evenement}
+            {formaterDateFr(personne.date_evenement)} — {personne.lieu_evenement}
           </Text>
           {personne.nom_pere ? <Text style={{ color: theme.textSecondary }}>Père : {personne.nom_pere}</Text> : null}
           {personne.nom_mere ? <Text style={{ color: theme.textSecondary }}>Mère : {personne.nom_mere}</Text> : null}

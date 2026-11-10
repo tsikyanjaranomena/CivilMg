@@ -1,7 +1,8 @@
+import { Alert } from '@/lib/alerte';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
 
 import { Bouton } from '@/components/ui/Bouton';

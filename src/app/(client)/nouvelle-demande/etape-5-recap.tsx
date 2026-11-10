@@ -1,6 +1,8 @@
+import { formaterDateFr } from '@/domain/dates';
+import { Alert } from '@/lib/alerte';
 import { Redirect, router } from 'expo-router';
 import { useMemo } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BarreProgression } from '@/components/nouvelle-demande/BarreProgression';
 import { Bouton } from '@/components/ui/Bouton';
@@ -99,7 +101,7 @@ export default function EtapeRecap() {
         <Text style={[styles.sectionTitre, { color: theme.text }]}>Personne concernée</Text>
         <Text style={{ color: theme.text }}>{etape2.nom} {etape2.prenoms ?? ''}</Text>
         <Text style={{ color: theme.textSecondary }}>
-          {etape2.dateEvenement} — {etape2.lieuEvenement}
+          {formaterDateFr(etape2.dateEvenement)} — {etape2.lieuEvenement}
         </Text>
       </View>
 

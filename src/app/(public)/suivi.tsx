@@ -1,3 +1,4 @@
+import { formaterDateFr } from '@/domain/dates';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
 import { useState } from 'react';
@@ -102,7 +103,7 @@ export default function EcranSuiviPublic() {
           <Text style={{ color: theme.textSecondary }}>{CONFIG_STATUTS[resultat.statut].descriptionClient}</Text>
           {resultat.date_echeance_estimee ? (
             <Text style={{ color: theme.textSecondary }}>
-              Échéance estimée : {resultat.date_echeance_estimee}
+              Échéance estimée : {formaterDateFr(resultat.date_echeance_estimee)}
             </Text>
           ) : null}
         </View>

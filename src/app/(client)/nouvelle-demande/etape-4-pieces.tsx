@@ -1,7 +1,8 @@
+import { Alert } from '@/lib/alerte';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BarreProgression } from '@/components/nouvelle-demande/BarreProgression';
 import { Bouton } from '@/components/ui/Bouton';

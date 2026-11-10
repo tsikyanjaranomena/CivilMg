@@ -1,8 +1,10 @@
+import { formaterDateFr } from '@/domain/dates';
+import { Alert } from '@/lib/alerte';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo } from 'react';
-import { Alert, Linking, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Linking, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { AjouterPieceBouton } from '@/components/dossier/AjouterPieceBouton';
 import { Timeline } from '@/components/dossier/Timeline';
@@ -151,7 +153,7 @@ export default function EcranDetailDossier() {
             {personne.nom} {personne.prenoms ?? ''}
           </Text>
           <Text style={{ color: theme.textSecondary }}>
-            {personne.date_evenement} — {personne.lieu_evenement}
+            {formaterDateFr(personne.date_evenement)} — {personne.lieu_evenement}
           </Text>
           {personne.nom_pere ? <Text style={{ color: theme.textSecondary }}>Père : {personne.nom_pere}</Text> : null}
           {personne.nom_mere ? <Text style={{ color: theme.textSecondary }}>Mère : {personne.nom_mere}</Text> : null}
