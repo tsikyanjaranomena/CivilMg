@@ -11,9 +11,16 @@ import { supabase } from '@/lib/supabase';
  * up, les mises à jour sont quasi instantanées ; sinon, le polling de repli
  * rattrape dans un délai borné.
  */
+let compteurCanaux = 0;
+
 export function sabonnerTable(nomCanal: string, table: string, filtre: string | undefined, onChangement: () => void) {
+  // supabase.channel(nom) renvoie le canal existant s'il porte déjà ce nom :
+  // deux composants abonnés au même sujet (ex. badge d'onglet + écran
+  // Notifications) feraient alors un .on() sur un canal déjà souscrit, ce qui
+  // lève une erreur. Un suffixe unique donne à chaque abonné son propre canal.
+  compteurCanaux += 1;
   const canal = supabase
-    .channel(nomCanal)
+    .channel(`${nomCanal}-${compteurCanaux}`)
     .on('postgres_changes', { event: '*', schema: 'public', table, filter: filtre }, onChangement)
     .subscribe();
 

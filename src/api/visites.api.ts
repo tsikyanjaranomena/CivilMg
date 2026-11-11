@@ -34,12 +34,12 @@ export interface DemandeAPlanifier {
   adresse: InfosAdresseTournee | null;
 }
 
-/** Dossiers SOUMIS sans visite planifiée : à traiter en priorité pour organiser les tournées. */
+/** Dossiers où le notaire doit appeler le client pour fixer (ou refixer) la visite. */
 export async function listerDemandesAPlanifier(): Promise<DemandeAPlanifier[]> {
   const { data, error } = await supabase
     .from('demandes')
     .select('id, reference, type_acte, commune_id, adresse_id')
-    .eq('statut', 'SOUMIS')
+    .in('statut', ['SOUMIS', 'VISITE_A_REPLANIFIER'])
     .is('deleted_at', null)
     .order('created_at', { ascending: true });
   if (error) throw error;

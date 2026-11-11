@@ -120,3 +120,10 @@ describe('adresseAutoriseVisite', () => {
     ).toBe(true);
   });
 });
+
+describe('circuit simplifié du notaire', () => {
+  it('autorise le notaire à passer directement de EN_TRAITEMENT à PRET', () => {
+    expect(peutTransitionner('EN_TRAITEMENT', 'PRET', 'responsable')).toBe(true);
+    expect(peutTransitionner('EN_TRAITEMENT', 'PRET', 'client')).toBe(false);
+  });
+});

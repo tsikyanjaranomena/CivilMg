@@ -40,6 +40,7 @@ const TRANSITIONS: Record<StatutDemande, TransitionAutorisee[]> = {
   EN_TRAITEMENT: [
     { vers: 'PIECES_A_COMPLETER', roles: ['responsable'], motifClientObligatoire: true },
     { vers: 'EN_VALIDATION', roles: ['responsable'] },
+    { vers: 'PRET', roles: ['responsable'] },
   ],
   EN_VALIDATION: [
     { vers: 'EN_TRAITEMENT', roles: ['responsable'] },

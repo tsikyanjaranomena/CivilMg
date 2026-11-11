@@ -1,17 +1,18 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import type { ColorValue } from 'react-native';
 
+import type { NomIcone } from '@/components/ui/Bouton';
 import { useTheme } from '@/hooks/use-theme';
-import { useNotifications } from '@/hooks/queries/useNotifications';
 
-function Icone({ symbole }: { symbole: string }) {
-  return <Text style={{ fontSize: 20 }}>{symbole}</Text>;
+function icone(nom: NomIcone) {
+  return function IconeOnglet({ color, size }: { color: ColorValue; size: number }) {
+    return <MaterialCommunityIcons name={nom} color={color} size={size + 2} />;
+  };
 }
 
 export default function LayoutTabsClient() {
   const theme = useTheme();
-  const { data: notifications = [] } = useNotifications();
-  const nonLues = notifications.filter((n) => !n.lu).length;
 
   return (
     <Tabs
@@ -19,22 +20,14 @@ export default function LayoutTabsClient() {
         headerShown: false,
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.textSecondary,
-        tabBarStyle: { backgroundColor: theme.background, borderTopColor: theme.border },
+        tabBarStyle: { backgroundColor: theme.backgroundElement, borderTopColor: theme.border, height: 64, paddingTop: 6 },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '600', paddingBottom: 6 },
       }}
     >
-      <Tabs.Screen
-        name="accueil"
-        options={{ title: 'Accueil', tabBarIcon: () => <Icone symbole="🏠" /> }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: 'Notifications',
-          tabBarIcon: () => <Icone symbole="🔔" />,
-          tabBarBadge: nonLues > 0 ? nonLues : undefined,
-        }}
-      />
-      <Tabs.Screen name="profil" options={{ title: 'Profil', tabBarIcon: () => <Icone symbole="👤" /> }} />
+      <Tabs.Screen name="accueil" options={{ title: 'Accueil', tabBarIcon: icone('home-variant') }} />
+      <Tabs.Screen name="dossiers" options={{ title: 'Dossiers', tabBarIcon: icone('folder-account-outline') }} />
+      <Tabs.Screen name="contact" options={{ title: 'Contact', tabBarIcon: icone('phone-outline') }} />
+      <Tabs.Screen name="profil" options={{ title: 'Profil', tabBarIcon: icone('account-circle-outline') }} />
     </Tabs>
   );
 }

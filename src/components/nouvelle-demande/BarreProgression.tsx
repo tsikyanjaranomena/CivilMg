@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-const ETAPES = ['Type', 'Personne', 'Adresse', 'Pièces', 'Récapitulatif'];
+const ETAPES = ['Informations', 'Adresse', 'Récapitulatif'];
 
 export function BarreProgression({ etapeActuelle }: { etapeActuelle: number }) {
   const theme = useTheme();

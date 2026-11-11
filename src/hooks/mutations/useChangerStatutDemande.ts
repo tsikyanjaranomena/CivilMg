@@ -12,6 +12,11 @@ export function useChangerStatutDemande(demandeId: string) {
       queryClient.invalidateQueries({ queryKey: ['dossier', demandeId] });
       queryClient.invalidateQueries({ queryKey: ['historique', demandeId] });
       queryClient.invalidateQueries({ queryKey: ['demandes', 'liste'] });
+      // Côté notaire : accueil (compteurs), liste des dossiers et onglet Visites.
+      queryClient.invalidateQueries({ queryKey: ['indicateurs'] });
+      queryClient.invalidateQueries({ queryKey: ['file-attente'] });
+      queryClient.invalidateQueries({ queryKey: ['demandes-a-planifier'] });
+      queryClient.invalidateQueries({ queryKey: ['visites-planifiees'] });
     },
   });
 }

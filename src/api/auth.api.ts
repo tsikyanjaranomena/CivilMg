@@ -1,36 +1,36 @@
+import { versFormatInternational, versFormatLocal } from '@/domain/validation/telephone';
 import { supabase } from '@/lib/supabase';
 
 interface InscriptionParams {
-  email: string;
+  telephone: string;
   password: string;
   nom: string;
-  telephone?: string;
 }
 
-export async function inscrireAvecEmail(params: InscriptionParams) {
+/** Inscription par téléphone + mot de passe (aucune confirmation par SMS). */
+export async function inscrireAvecTelephone(params: InscriptionParams) {
   const { data, error } = await supabase.auth.signUp({
-    email: params.email,
+    phone: versFormatInternational(params.telephone),
     password: params.password,
     options: {
-      data: { nom: params.nom, telephone: params.telephone || undefined },
+      // Le profil stocke le numéro au format local, plus lisible.
+      data: { nom: params.nom, telephone: versFormatLocal(params.telephone) },
     },
   });
   if (error) throw error;
   return data;
 }
 
-export async function connecterAvecEmail(params: { email: string; password: string }) {
-  const { data, error } = await supabase.auth.signInWithPassword(params);
+export async function connecterAvecTelephone(params: { telephone: string; password: string }) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    phone: versFormatInternational(params.telephone),
+    password: params.password,
+  });
   if (error) throw error;
   return data;
 }
 
 export async function deconnecter() {
   const { error } = await supabase.auth.signOut();
-  if (error) throw error;
-}
-
-export async function demanderReinitialisationMotDePasse(email: string) {
-  const { error } = await supabase.auth.resetPasswordForEmail(email);
   if (error) throw error;
 }

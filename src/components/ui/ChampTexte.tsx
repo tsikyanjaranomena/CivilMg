@@ -1,6 +1,6 @@
 import { StyleSheet, Text, TextInput, type TextInputProps, View } from 'react-native';
 
-import { MinTouchTarget, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 interface ChampTexteProps extends TextInputProps {
@@ -8,17 +8,19 @@ interface ChampTexteProps extends TextInputProps {
   erreur?: string;
 }
 
-export function ChampTexte({ etiquette, erreur, style, ...props }: ChampTexteProps) {
+export function ChampTexte({ etiquette, erreur, style, multiline, ...props }: ChampTexteProps) {
   const theme = useTheme();
 
   return (
     <View style={styles.conteneur}>
-      <Text style={[styles.etiquette, { color: theme.text }]}>{etiquette}</Text>
+      <Text style={[styles.etiquette, { color: theme.textSecondary }]}>{etiquette}</Text>
       <TextInput
         accessibilityLabel={etiquette}
         placeholderTextColor={theme.textSecondary}
+        multiline={multiline}
         style={[
           styles.champ,
+          multiline ? styles.champMultiligne : null,
           {
             borderColor: erreur ? theme.danger : theme.border,
             color: theme.text,
@@ -34,14 +36,15 @@ export function ChampTexte({ etiquette, erreur, style, ...props }: ChampTextePro
 }
 
 const styles = StyleSheet.create({
-  conteneur: { gap: Spacing.one },
-  etiquette: { fontSize: 15, fontWeight: '600' },
+  conteneur: { gap: 6 },
+  etiquette: { fontSize: 14, fontWeight: '600' },
   champ: {
-    minHeight: MinTouchTarget,
-    borderWidth: 1,
-    borderRadius: 10,
+    minHeight: 52,
+    borderWidth: 1.5,
+    borderRadius: 12,
     paddingHorizontal: Spacing.three,
     fontSize: 16,
   },
+  champMultiligne: { minHeight: 90, paddingTop: Spacing.three, textAlignVertical: 'top' },
   erreur: { fontSize: 13 },
 });

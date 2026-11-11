@@ -1,12 +1,14 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { connecterAvecEmail } from '@/api/auth.api';
+import { connecterAvecTelephone } from '@/api/auth.api';
 import { Bouton } from '@/components/ui/Bouton';
 import { ChampTexte } from '@/components/ui/ChampTexte';
+import { ETUDE } from '@/constants/etude';
 import { Spacing } from '@/constants/theme';
 import { connexionSchema, type ConnexionValues } from '@/domain/validation/authSchema';
 import { useTheme } from '@/hooks/use-theme';
@@ -23,7 +25,7 @@ export default function EcranConnexion() {
     formState: { errors, isSubmitting },
   } = useForm<ConnexionValues>({
     resolver: zodResolver(connexionSchema),
-    defaultValues: { email: '', motDePasse: '' },
+    defaultValues: { telephone: '', motDePasse: '' },
   });
 
   // Déjà connecté (ex: retour arrière) : laisser la porte d'entrée rediriger.
@@ -32,7 +34,7 @@ export default function EcranConnexion() {
   async function onSubmit(valeurs: ConnexionValues) {
     setErreurGlobale(null);
     try {
-      await connecterAvecEmail({ email: valeurs.email, password: valeurs.motDePasse });
+      await connecterAvecTelephone({ telephone: valeurs.telephone, password: valeurs.motDePasse });
       router.replace('/');
     } catch (erreur) {
       setErreurGlobale(messageErreurAuth(erreur));
@@ -44,23 +46,26 @@ export default function EcranConnexion() {
       contentContainerStyle={[styles.conteneur, { backgroundColor: theme.background }]}
       keyboardShouldPersistTaps="handled"
     >
+      <View style={[styles.logo, { backgroundColor: theme.primary }]}>
+        <MaterialCommunityIcons name="file-certificate-outline" size={46} color={theme.primaryText} />
+      </View>
       <Text style={[styles.titre, { color: theme.text }]}>CivilMg</Text>
       <Text style={[styles.soustitre, { color: theme.textSecondary }]}>
-        {"Suivi des demandes d'actes de naissance et de décès"}
+        {"Votre acte de naissance ou de décès, sans vous déplacer. Le notaire vient chez vous."}
       </Text>
 
       <Controller
         control={control}
-        name="email"
+        name="telephone"
         render={({ field }) => (
           <ChampTexte
-            etiquette="Email"
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
+            etiquette="Numéro de téléphone"
+            placeholder="034 12 345 67"
+            autoComplete="tel"
+            keyboardType="phone-pad"
             value={field.value}
             onChangeText={field.onChange}
-            erreur={errors.email?.message}
+            erreur={errors.telephone?.message}
           />
         )}
       />
@@ -83,9 +88,9 @@ export default function EcranConnexion() {
 
       <Bouton titre="Se connecter" onPress={handleSubmit(onSubmit)} enChargement={isSubmitting} />
 
-      <Link href="/mot-de-passe-oublie" style={[styles.lien, { color: theme.primary }]}>
-        Mot de passe oublié ?
-      </Link>
+      <Text style={[styles.aide, { color: theme.textSecondary }]}>
+        {`Mot de passe oublié ? Appelez l'étude au ${ETUDE.telephone}.`}
+      </Text>
       <Link href="/inscription" style={[styles.lien, { color: theme.primary }]}>
         Créer un compte
       </Link>
@@ -98,7 +103,16 @@ export default function EcranConnexion() {
 
 const styles = StyleSheet.create({
   conteneur: { flexGrow: 1, justifyContent: 'center', padding: Spacing.four, gap: Spacing.three },
-  titre: { fontSize: 30, fontWeight: '700', textAlign: 'center' },
-  soustitre: { fontSize: 15, textAlign: 'center', marginBottom: Spacing.three },
+  logo: {
+    alignSelf: 'center',
+    width: 84,
+    height: 84,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titre: { fontSize: 32, fontWeight: '800', textAlign: 'center' },
+  soustitre: { fontSize: 15, textAlign: 'center', marginBottom: Spacing.three, lineHeight: 21 },
   lien: { fontSize: 15, textAlign: 'center', paddingVertical: Spacing.one, fontWeight: '600' },
+  aide: { fontSize: 14, textAlign: 'center' },
 });

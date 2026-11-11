@@ -66,12 +66,3 @@ export async function listerFileAttente(filtres: FiltresFileAttente): Promise<Li
 
   return demandes.map((d) => ({ ...d, nomPersonne: nomParDemande.get(d.id) ?? '' }));
 }
-
-export async function prendreEnChargeDemande(demandeId: string, responsableId: string): Promise<void> {
-  const { error } = await supabase
-    .from('demandes')
-    .update({ pris_en_charge_par: responsableId })
-    .eq('id', demandeId)
-    .is('pris_en_charge_par', null);
-  if (error) throw error;
-}

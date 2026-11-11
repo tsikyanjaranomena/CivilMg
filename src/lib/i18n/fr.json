@@ -24,11 +24,11 @@
     "BROUILLON": "Votre demande n'a pas encore été envoyée.",
     "SOUMIS": "Votre demande a été reçue et va être examinée.",
     "PIECES_A_COMPLETER": "Des pièces manquantes ou à corriger sont nécessaires.",
-    "VISITE_PLANIFIEE": "Un agent du service viendra vérifier votre dossier à domicile.",
+    "VISITE_PLANIFIEE": "Le notaire viendra chez vous vérifier le dossier, récupérer la procuration et l'acompte de 50 %.",
     "VISITE_A_REPLANIFIER": "La visite doit être reprogrammée.",
     "EN_TRAITEMENT": "Votre dossier est en cours de traitement.",
     "EN_VALIDATION": "Votre dossier est en cours de validation finale.",
-    "PRET": "Votre acte est prêt. Vous pouvez venir le retirer.",
+    "PRET": "Votre acte est prêt. Il vous sera remis contre le solde de 50 %.",
     "LIVRE": "Votre acte vous a été remis.",
     "REJETE": "Votre demande a été rejetée.",
     "ANNULE": "Votre demande a été annulée."

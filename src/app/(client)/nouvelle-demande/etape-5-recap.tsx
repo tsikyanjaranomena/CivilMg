@@ -1,16 +1,15 @@
+import { PageAvecRetour } from '@/components/ui/PageAvecRetour';
+import { FRAIS, FRAIS_TOTAL, formaterAriary } from '@/domain/paiement';
 import { formaterDateFr } from '@/domain/dates';
 import { Alert } from '@/lib/alerte';
 import { Redirect, router } from 'expo-router';
-import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { BarreProgression } from '@/components/nouvelle-demande/BarreProgression';
 import { Bouton } from '@/components/ui/Bouton';
+import { CompteurNumerique } from '@/components/ui/CompteurNumerique';
 import { Spacing } from '@/constants/theme';
-import { calculerMontant, type Tarif } from '@/domain/tarifs';
 import { useTheme } from '@/hooks/use-theme';
-import { useParametre } from '@/hooks/queries/useParametre';
-import { useTarifs } from '@/hooks/queries/useReferentiels';
 import { useCreerDemande } from '@/hooks/mutations/useCreerDemande';
 import { messageErreurGenerique } from '@/lib/erreurs';
 import { useNouvelleDemandeStore } from '@/stores/nouvelleDemandeStore';
@@ -22,22 +21,13 @@ export default function EtapeRecap() {
   const etape1 = useNouvelleDemandeStore((s) => s.etape1);
   const etape2 = useNouvelleDemandeStore((s) => s.etape2);
   const etape3 = useNouvelleDemandeStore((s) => s.etape3);
-  const etape4 = useNouvelleDemandeStore((s) => s.etape4);
   const reinitialiser = useNouvelleDemandeStore((s) => s.reinitialiser);
-  const { data: tarifsDb = [] } = useTarifs();
-  const { data: texteVisite } = useParametre('aide_visite');
+  const definirEtape1 = useNouvelleDemandeStore((s) => s.definirEtape1);
   const creerDemande = useCreerDemande();
 
-  const tarifs: Tarif[] = useMemo(
-    () => tarifsDb.map((t) => ({ typeActe: t.type_acte, communeId: t.commune_id, montant: Number(t.montant) })),
-    [tarifsDb],
-  );
-
   if (!etape1 || !etape2 || !etape3 || !userId) {
-    return <Redirect href="/nouvelle-demande/etape-1-type" />;
+    return <Redirect href="/accueil" />;
   }
-
-  const montant = calculerMontant(tarifs, etape1.typeActe, etape3.communeId, etape1.nombreCopies);
 
   async function onConfirmer() {
     if (!etape1 || !etape2 || !etape3 || !userId) return;
@@ -62,18 +52,13 @@ export default function EtapeRecap() {
         adresse: etape3.idExistant
           ? { type: 'existante', idExistant: etape3.idExistant, communeId: etape3.communeId }
           : { type: 'nouvelle', valeurs: etape3 },
-        documents: etape4.map((d) => ({
-          uri: d.uri,
-          nomFichier: d.nomFichier,
-          mimeType: d.mimeType,
-          typePieceId: d.typePieceId,
-        })),
+        documents: [],
       });
 
       reinitialiser();
       Alert.alert(
         'Demande envoyée',
-        `Votre dossier ${resultat.reference} a bien été enregistré. Un agent viendra prochainement vérifier vos informations à domicile.`,
+        `Votre dossier ${resultat.reference} a bien été enregistré. Le notaire vous contactera pour fixer sa visite.`,
         [{ text: 'OK', onPress: () => router.replace('/accueil') }],
       );
     } catch (erreur) {
@@ -82,23 +67,29 @@ export default function EtapeRecap() {
   }
 
   return (
+    <PageAvecRetour titre="Nouvelle demande">
     <ScrollView
       contentContainerStyle={[styles.conteneur, { backgroundColor: theme.background }]}
       keyboardShouldPersistTaps="handled"
     >
-      <BarreProgression etapeActuelle={5} />
+      <BarreProgression etapeActuelle={3} />
       <Text style={[styles.titre, { color: theme.text }]}>Récapitulatif</Text>
 
       <View style={[styles.section, { backgroundColor: theme.backgroundElement }]}>
-        <Text style={[styles.sectionTitre, { color: theme.text }]}>Demande</Text>
-        <Text style={{ color: theme.text }}>
-          {etape1.typeActe === 'naissance' ? 'Acte de naissance' : 'Acte de décès'} — {etape1.nombreCopies} copie(s)
+        <Text style={[styles.sectionTitre, { color: theme.text }]}>
+          {etape1.typeActe === 'naissance' ? 'Acte de naissance' : 'Acte de décès'}
         </Text>
-        {etape1.motif ? <Text style={{ color: theme.textSecondary }}>{etape1.motif}</Text> : null}
+        <CompteurNumerique
+          etiquette="Nombre de copies"
+          valeur={etape1.nombreCopies}
+          onChangement={(nombreCopies) => definirEtape1({ ...etape1, nombreCopies })}
+        />
       </View>
 
       <View style={[styles.section, { backgroundColor: theme.backgroundElement }]}>
-        <Text style={[styles.sectionTitre, { color: theme.text }]}>Personne concernée</Text>
+        <Text style={[styles.sectionTitre, { color: theme.text }]}>
+          {etape1.typeActe === 'naissance' ? 'Enfant' : 'Personne concernée'}
+        </Text>
         <Text style={{ color: theme.text }}>{etape2.nom} {etape2.prenoms ?? ''}</Text>
         <Text style={{ color: theme.textSecondary }}>
           {formaterDateFr(etape2.dateEvenement)} — {etape2.lieuEvenement}
@@ -115,33 +106,56 @@ export default function EtapeRecap() {
       </View>
 
       <View style={[styles.section, { backgroundColor: theme.backgroundElement }]}>
-        <Text style={[styles.sectionTitre, { color: theme.text }]}>Pièces jointes</Text>
-        <Text style={{ color: theme.text }}>{etape4.length} pièce(s) jointe(s)</Text>
-      </View>
-
-      <View style={[styles.section, { backgroundColor: theme.backgroundElement }]}>
-        <Text style={[styles.sectionTitre, { color: theme.text }]}>Tarif estimé</Text>
-        <Text style={{ color: theme.text, fontSize: 22, fontWeight: '700' }}>
-          {montant !== null ? `${montant.toLocaleString('fr-FR')} Ar` : 'À confirmer par le service'}
+        <Text style={[styles.sectionTitre, { color: theme.text }]}>Frais à régler au notaire</Text>
+        <LigneFrais libelle="À sa première visite chez vous" montant={FRAIS.visite} theme={theme} />
+        <LigneFrais libelle="À la remise de votre acte" montant={FRAIS.remise} theme={theme} />
+        <View style={[styles.separateur, { backgroundColor: theme.border }]} />
+        <LigneFrais libelle="Total" montant={FRAIS_TOTAL} theme={theme} gras />
+        <Text style={{ color: theme.textSecondary, fontSize: 13, marginTop: Spacing.one }}>
+          Rien à payer dans l&apos;application : vous réglez directement le notaire, en main propre.
         </Text>
       </View>
 
       <Text style={{ color: theme.textSecondary }}>
-        {texteVisite ??
-          "Préparez les documents originaux mentionnés dans votre dossier. La procuration sera signée sur place, aucun document à envoyer à l'avance."}
+        Le notaire viendra chez vous vérifier les informations. Vous lui remettrez la procuration signée et{' '}
+        {formaterAriary(FRAIS.visite)}.
       </Text>
 
       <Bouton
-        titre="Confirmer et envoyer ma demande"
+        titre="Envoyer ma demande"
+        icone="send"
         onPress={onConfirmer}
         enChargement={creerDemande.isPending}
       />
       <Bouton titre="Retour" variante="secondaire" onPress={() => router.back()} desactive={creerDemande.isPending} />
     </ScrollView>
+    </PageAvecRetour>
+  );
+}
+
+function LigneFrais({
+  libelle,
+  montant,
+  theme,
+  gras,
+}: {
+  libelle: string;
+  montant: number;
+  theme: ReturnType<typeof useTheme>;
+  gras?: boolean;
+}) {
+  const poids = gras ? '800' : '500';
+  return (
+    <View style={styles.ligneFrais}>
+      <Text style={{ color: theme.text, fontWeight: poids, flex: 1 }}>{libelle}</Text>
+      <Text style={{ color: theme.text, fontWeight: gras ? '800' : '700' }}>{formaterAriary(montant)}</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  ligneFrais: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, paddingVertical: 2 },
+  separateur: { height: 1, marginVertical: Spacing.one },
   conteneur: { flexGrow: 1, padding: Spacing.four, gap: Spacing.three },
   titre: { fontSize: 20, fontWeight: '700' },
   section: { borderRadius: 12, padding: Spacing.three, gap: Spacing.one },

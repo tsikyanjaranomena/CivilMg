@@ -1,6 +1,5 @@
 import { changerStatutDemande } from '@/api/demandes.api';
 import { marquerNotificationLue } from '@/api/notifications.api';
-import { creerRequeteClient, type TypeRequeteClient } from '@/api/requetesClient.api';
 import type { StatutDemandeDb } from '@/types/database.types';
 
 import { enregistrerGestionnaireFileEnvoi } from './fileEnvoi';
@@ -19,9 +18,4 @@ export function enregistrerGestionnairesFileEnvoi() {
   }>('changer_statut_demande', (p) => changerStatutDemande(p.demandeId, p.nouveauStatut, p.commentaireClient));
 
   enregistrerGestionnaireFileEnvoi<{ id: string }>('marquer_notification_lue', (p) => marquerNotificationLue(p.id));
-
-  enregistrerGestionnaireFileEnvoi<{ demandeId: string; type: TypeRequeteClient; message?: string }>(
-    'creer_requete_client',
-    (p) => creerRequeteClient(p.demandeId, p.type, p.message),
-  );
 }

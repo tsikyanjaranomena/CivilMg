@@ -15,8 +15,10 @@ interface ChampDateProps {
   dateMaximum?: Date;
 }
 
+/** Date locale → AAAA-MM-JJ (toISOString passerait en UTC et peut reculer d'un jour à Madagascar, UTC+3). */
 function versISO(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  const deux = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${deux(date.getMonth() + 1)}-${deux(date.getDate())}`;
 }
 
 export function ChampDate({ etiquette, valeur, onChangement, erreur, dateMaximum }: ChampDateProps) {

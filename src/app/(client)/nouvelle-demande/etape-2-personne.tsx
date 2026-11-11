@@ -1,3 +1,4 @@
+import { PageAvecRetour } from '@/components/ui/PageAvecRetour';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Redirect, router } from 'expo-router';
 import { useMemo } from 'react';
@@ -8,7 +9,6 @@ import { BarreProgression } from '@/components/nouvelle-demande/BarreProgression
 import { Bouton } from '@/components/ui/Bouton';
 import { ChampDate } from '@/components/ui/ChampDate';
 import { ChampTexte } from '@/components/ui/ChampTexte';
-import { ChoixSegmente } from '@/components/ui/ChoixSegmente';
 import { Spacing } from '@/constants/theme';
 import { schemaPersonnePourType, type PersonneValues } from '@/domain/validation/demandeSchema';
 import { useTheme } from '@/hooks/use-theme';
@@ -33,13 +33,13 @@ export default function EtapePersonne() {
       prenoms: '',
       dateEvenement: '',
       lieuEvenement: '',
-      pourSoiMeme: true,
+      pourSoiMeme: false,
       ...(etape1?.typeActe === 'naissance' ? { nomPere: '', nomMere: '' } : {}),
     },
   });
 
   // Étape 1 non complétée : on ne peut pas savoir quel schéma appliquer.
-  if (!etape1) return <Redirect href="/nouvelle-demande/etape-1-type" />;
+  if (!etape1) return <Redirect href="/accueil" />;
 
   const erreursNaissance = errors as Partial<Record<'nomPere' | 'nomMere', { message?: string }>>;
 
@@ -49,46 +49,28 @@ export default function EtapePersonne() {
   }
 
   return (
+    <PageAvecRetour titre="Nouvelle demande">
     <ScrollView
       contentContainerStyle={[styles.conteneur, { backgroundColor: theme.background }]}
       keyboardShouldPersistTaps="handled"
     >
-      <BarreProgression etapeActuelle={2} />
+      <BarreProgression etapeActuelle={1} />
       <Text style={[styles.titre, { color: theme.text }]}>
-        {etape1.typeActe === 'naissance' ? 'Personne dont on demande l’acte de naissance' : 'Personne décédée concernée'}
-      </Text>
-
-      <Controller
-        control={control}
-        name="pourSoiMeme"
-        render={({ field }) => (
-          <ChoixSegmente
-            etiquette="La demande est faite pour"
-            options={[
-              { valeur: 'oui', libelle: 'Moi-même' },
-              { valeur: 'non', libelle: 'Une autre personne' },
-            ]}
-            valeur={field.value ? 'oui' : 'non'}
-            onChangement={(v) => field.onChange(v === 'oui')}
-          />
-        )}
-      />
-      <Text style={{ color: theme.textSecondary, fontSize: 13 }}>
-        {"Cette réponse informe uniquement l'agent de ce qu'il devra vérifier lors de la visite à domicile."}
+        {etape1.typeActe === 'naissance' ? 'Informations sur l’enfant et ses parents' : 'Personne décédée concernée'}
       </Text>
 
       <Controller
         control={control}
         name="nom"
         render={({ field }) => (
-          <ChampTexte etiquette="Nom" value={field.value} onChangeText={field.onChange} erreur={errors.nom?.message} />
+          <ChampTexte etiquette={etape1.typeActe === 'naissance' ? "Nom de l'enfant" : 'Nom'} value={field.value} onChangeText={field.onChange} erreur={errors.nom?.message} />
         )}
       />
       <Controller
         control={control}
         name="prenoms"
         render={({ field }) => (
-          <ChampTexte etiquette="Prénoms" value={field.value} onChangeText={field.onChange} />
+          <ChampTexte etiquette={etape1.typeActe === 'naissance' ? "Prénoms de l'enfant" : 'Prénoms'} value={field.value} onChangeText={field.onChange} />
         )}
       />
       <Controller
@@ -124,7 +106,7 @@ export default function EtapePersonne() {
             name="nomPere"
             render={({ field }) => (
               <ChampTexte
-                etiquette="Nom du père (optionnel)"
+                etiquette="Nom du père"
                 value={field.value as string}
                 onChangeText={field.onChange}
                 erreur={erreursNaissance.nomPere?.message}
@@ -136,7 +118,7 @@ export default function EtapePersonne() {
             name="nomMere"
             render={({ field }) => (
               <ChampTexte
-                etiquette="Nom de la mère (optionnel)"
+                etiquette="Nom de la mère"
                 value={field.value as string}
                 onChangeText={field.onChange}
                 erreur={erreursNaissance.nomMere?.message}
@@ -146,17 +128,10 @@ export default function EtapePersonne() {
         </>
       ) : null}
 
-      <Controller
-        control={control}
-        name="numeroActe"
-        render={({ field }) => (
-          <ChampTexte etiquette="Numéro d'acte (si connu)" value={field.value} onChangeText={field.onChange} />
-        )}
-      />
-
-      <Bouton titre="Continuer" onPress={handleSubmit(onSubmit)} />
+      <Bouton titre="Continuer" icone="arrow-right" onPress={handleSubmit(onSubmit)} />
       <Bouton titre="Retour" variante="secondaire" onPress={() => router.back()} />
     </ScrollView>
+    </PageAvecRetour>
   );
 }
 

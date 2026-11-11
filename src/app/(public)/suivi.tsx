@@ -1,3 +1,4 @@
+import { PageAvecRetour } from '@/components/ui/PageAvecRetour';
 import { formaterDateFr } from '@/domain/dates';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
@@ -45,6 +46,7 @@ export default function EcranSuiviPublic() {
   }
 
   return (
+    <PageAvecRetour titre="Suivre une demande">
     <ScrollView
       contentContainerStyle={[styles.conteneur, { backgroundColor: theme.background }]}
       keyboardShouldPersistTaps="handled"
@@ -61,7 +63,7 @@ export default function EcranSuiviPublic() {
         render={({ field }) => (
           <ChampTexte
             etiquette="Numéro de référence"
-            placeholder="ACT-2026-000142"
+            placeholder="ACT-2026-12"
             autoCapitalize="characters"
             value={field.value}
             onChangeText={field.onChange}
@@ -113,6 +115,7 @@ export default function EcranSuiviPublic() {
         Retour à la connexion
       </Link>
     </ScrollView>
+    </PageAvecRetour>
   );
 }
 

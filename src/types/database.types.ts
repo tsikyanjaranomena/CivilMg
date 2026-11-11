@@ -29,7 +29,7 @@ export type StatutVisiteDb =
   | 'echec'
   | 'reportee';
 export type StatutDocumentDb = 'en_attente' | 'valide' | 'refuse';
-export type StatutPaiementDb = 'non_paye' | 'paye';
+export type StatutPaiementDb = 'non_paye' | 'acompte_paye' | 'paye';
 export type CanalNotificationDb = 'push' | 'sms' | 'email' | 'in_app';
 
 interface TableDef<Row, Insert, Update> {
@@ -182,6 +182,7 @@ export interface Database {
           nombre_copies: number;
           motif: string | null;
           pour_soi_meme: boolean;
+          statut_paiement: StatutPaiementDb;
         }>
       >;
       demandes_notes_internes: TableDef<

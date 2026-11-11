@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
-import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
+
+import { chargerNotifications } from '@/lib/notifications';
 
 function ouvrirDossierSiPresent(donnees: unknown) {
   const demandeId = (donnees as { demandeId?: string } | undefined)?.demandeId;
@@ -12,6 +13,9 @@ function ouvrirDossierSiPresent(donnees: unknown) {
 /** Ouvre le dossier concerné quand l'utilisateur appuie sur une notification push (app en fond ou fermée). */
 export function useNavigationDepuisNotification() {
   useEffect(() => {
+    const Notifications = chargerNotifications();
+    if (!Notifications) return;
+
     Notifications.getLastNotificationResponseAsync().then((reponse) => {
       if (reponse) ouvrirDossierSiPresent(reponse.notification.request.content.data);
     });

@@ -1,30 +1,27 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BadgeStatut } from '@/components/ui/BadgeStatut';
-import { Bouton } from '@/components/ui/Bouton';
+import { ETAPES_NOTAIRE, etapeDuStatut, etapeParCle } from '@/components/notaire/etapes';
 import { Spacing } from '@/constants/theme';
-import type { StatutDemande } from '@/domain/statuts/statutConfig';
+import { CONFIG_STATUTS, type StatutDemande } from '@/domain/statuts/statutConfig';
 import { useFileAttente } from '@/hooks/queries/useFileAttente';
-import { usePrendreEnCharge } from '@/hooks/mutations/usePrendreEnCharge';
-import { useSessionStore } from '@/stores/sessionStore';
 import { useTheme } from '@/hooks/use-theme';
 
-type FiltrePriseEnCharge = 'tous' | 'non_pris' | 'moi';
-
-export default function EcranFileAttente() {
+export default function EcranDossiersNotaire() {
   const theme = useTheme();
-  const userId = useSessionStore((s) => s.session?.user.id);
+  const insets = useSafeAreaInsets();
+  // Le filtre vit dans l'URL : l'accueil peut ouvrir directement « À appeler », etc.
+  const { etape: cleEtape } = useLocalSearchParams<{ etape?: string }>();
+  const etapeActive = etapeParCle(cleEtape);
   const [recherche, setRecherche] = useState('');
-  const [filtrePriseEnCharge, setFiltrePriseEnCharge] = useState<FiltrePriseEnCharge>('tous');
   const { data: demandes = [], isLoading, refetch, isRefetching } = useFileAttente({
-    prisEnCharge: filtrePriseEnCharge,
-    responsableId: userId,
+    statuts: etapeActive?.statuts,
   });
-  const prendreEnCharge = usePrendreEnCharge();
 
   const demandesFiltrees = useMemo(() => {
     const terme = recherche.trim().toLowerCase();
@@ -34,8 +31,10 @@ export default function EcranFileAttente() {
     );
   }, [demandes, recherche]);
 
+  const filtres = [{ cle: undefined, court: 'En cours' }, ...ETAPES_NOTAIRE];
+
   return (
-    <View style={[styles.ecran, { backgroundColor: theme.background }]}>
+    <View style={[styles.ecran, { backgroundColor: theme.background, paddingTop: insets.top }]}>
       <FlatList
         data={demandesFiltrees}
         keyExtractor={(item) => item.id}
@@ -44,67 +43,85 @@ export default function EcranFileAttente() {
         contentContainerStyle={styles.liste}
         ListHeaderComponent={
           <View style={styles.entete}>
-            <Text style={[styles.titre, { color: theme.text }]}>{"File d'attente"}</Text>
-            <TextInput
-              placeholder="Rechercher par référence ou nom"
-              placeholderTextColor={theme.textSecondary}
-              value={recherche}
-              onChangeText={setRecherche}
-              style={[styles.recherche, { borderColor: theme.border, color: theme.text, backgroundColor: theme.backgroundElement }]}
-            />
-            <View style={styles.filtres}>
-              {(['tous', 'non_pris', 'moi'] as FiltrePriseEnCharge[]).map((valeur) => (
-                <Pressable
-                  key={valeur}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: filtrePriseEnCharge === valeur }}
-                  onPress={() => setFiltrePriseEnCharge(valeur)}
-                  style={[
-                    styles.puce,
-                    {
-                      backgroundColor: filtrePriseEnCharge === valeur ? theme.primary : theme.backgroundElement,
-                      borderColor: theme.border,
-                    },
-                  ]}
-                >
-                  <Text style={{ color: filtrePriseEnCharge === valeur ? theme.primaryText : theme.text, fontWeight: '600' }}>
-                    {valeur === 'tous' ? 'Tous' : valeur === 'non_pris' ? 'Non pris en charge' : 'Mes dossiers'}
-                  </Text>
-                </Pressable>
-              ))}
+            <Text style={[styles.titre, { color: theme.text }]}>Dossiers</Text>
+            <View style={[styles.recherche, { borderColor: theme.border, backgroundColor: theme.backgroundElement }]}>
+              <MaterialCommunityIcons name="magnify" size={22} color={theme.textSecondary} />
+              <TextInput
+                placeholder="Référence ou nom"
+                placeholderTextColor={theme.textSecondary}
+                value={recherche}
+                onChangeText={setRecherche}
+                style={[styles.champRecherche, { color: theme.text }]}
+              />
             </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtres}>
+              {filtres.map((f) => {
+                const actif = (f.cle ?? null) === (etapeActive?.cle ?? null);
+                return (
+                  <Pressable
+                    key={f.court}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: actif }}
+                    onPress={() => router.setParams({ etape: f.cle ?? '' })}
+                    style={[
+                      styles.puce,
+                      { backgroundColor: actif ? theme.primary : theme.backgroundElement, borderColor: actif ? theme.primary : theme.border },
+                    ]}
+                  >
+                    <Text style={{ color: actif ? theme.primaryText : theme.text, fontWeight: '600' }}>{f.court}</Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
           </View>
         }
-        renderItem={({ item }) => (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Dossier ${item.reference}${item.nomPersonne ? `, ${item.nomPersonne}` : ''}`}
-            onPress={() => router.push(`/traitement/${item.id}`)}
-            style={[styles.carte, { backgroundColor: theme.backgroundElement }]}
-          >
-            <View style={{ flex: 1, gap: 4 }}>
-              <Text style={{ color: theme.text, fontWeight: '700' }}>{item.reference}</Text>
-              {item.nomPersonne ? <Text style={{ color: theme.textSecondary }}>{item.nomPersonne}</Text> : null}
-              <Text style={{ color: theme.textSecondary, fontSize: 12 }}>
-                Créé {formatDistanceToNow(new Date(item.created_at), { addSuffix: true, locale: fr })}
-              </Text>
-              <BadgeStatut statut={item.statut as StatutDemande} />
-            </View>
-            {!item.pris_en_charge_par ? (
-              <Bouton
-                titre="Prendre en charge"
-                variante="secondaire"
-                enChargement={prendreEnCharge.isPending}
-                onPress={() => prendreEnCharge.mutate(item.id)}
-              />
-            ) : null}
-          </Pressable>
-        )}
+        renderItem={({ item }) => {
+          const statut = item.statut as StatutDemande;
+          const etape = etapeDuStatut(statut);
+          const estNaissance = item.type_acte === 'naissance';
+          return (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Dossier ${item.reference}${item.nomPersonne ? `, ${item.nomPersonne}` : ''}`}
+              onPress={() => router.push(`/traitement/${item.id}`)}
+              style={({ pressed }) => [
+                styles.carte,
+                { backgroundColor: theme.backgroundElement, borderColor: theme.border, opacity: pressed ? 0.85 : 1 },
+              ]}
+            >
+              <View style={[styles.iconeType, { backgroundColor: estNaissance ? '#E3EDFB' : '#EEE8F8' }]}>
+                <MaterialCommunityIcons
+                  name={estNaissance ? 'baby-carriage' : 'flower-tulip-outline'}
+                  size={26}
+                  color={estNaissance ? '#1E56A0' : '#6B4FA3'}
+                />
+              </View>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text style={{ color: theme.text, fontWeight: '700', fontSize: 16 }} numberOfLines={1}>
+                  {item.nomPersonne || item.reference}
+                </Text>
+                <Text style={{ color: theme.textSecondary, fontSize: 13 }}>
+                  {item.reference} · {formatDistanceToNow(new Date(item.created_at), { addSuffix: true, locale: fr })}
+                </Text>
+                {etape ? (
+                  <View style={[styles.etiquette, { backgroundColor: etape.fond }]}>
+                    <MaterialCommunityIcons name={etape.icone} size={14} color={etape.couleur} />
+                    <Text style={{ color: etape.couleur, fontSize: 12, fontWeight: '700' }}>{etape.titre}</Text>
+                  </View>
+                ) : (
+                  <Text style={{ color: theme.danger, fontSize: 12, fontWeight: '700' }}>{CONFIG_STATUTS[statut].libelle}</Text>
+                )}
+              </View>
+              <MaterialCommunityIcons name="chevron-right" size={26} color={theme.textSecondary} />
+            </Pressable>
+          );
+        }}
         ListEmptyComponent={
           !isLoading ? (
-            <Text style={{ color: theme.textSecondary, textAlign: 'center', marginTop: Spacing.six }}>
-              Aucun dossier ne correspond à ces critères.
-            </Text>
+            <View style={styles.vide}>
+              <MaterialCommunityIcons name="folder-check-outline" size={56} color={theme.textSecondary} />
+              <Text style={{ color: theme.textSecondary, textAlign: 'center' }}>Aucun dossier ici.</Text>
+            </View>
           ) : null
         }
       />
@@ -114,19 +131,39 @@ export default function EcranFileAttente() {
 
 const styles = StyleSheet.create({
   ecran: { flex: 1 },
-  liste: { padding: Spacing.four, gap: Spacing.two },
-  entete: { gap: Spacing.two, marginBottom: Spacing.two },
-  titre: { fontSize: 24, fontWeight: '700' },
-  recherche: { minHeight: 44, borderWidth: 1, borderRadius: 10, paddingHorizontal: Spacing.three, fontSize: 16 },
-  filtres: { flexDirection: 'row', gap: Spacing.two, flexWrap: 'wrap' },
-  puce: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.one, borderRadius: 999, borderWidth: 1 },
+  liste: { padding: Spacing.three, gap: Spacing.two },
+  entete: { gap: Spacing.two, marginBottom: Spacing.one },
+  titre: { fontSize: 26, fontWeight: '800', marginTop: Spacing.two },
+  recherche: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    minHeight: 48,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: Spacing.three,
+  },
+  champRecherche: { flex: 1, fontSize: 16, paddingVertical: Spacing.two },
+  filtres: { gap: Spacing.two, paddingVertical: 2 },
+  puce: { paddingHorizontal: Spacing.three, paddingVertical: Spacing.two, borderRadius: 999, borderWidth: 1 },
   carte: {
-    borderRadius: 12,
+    borderRadius: 18,
+    borderWidth: 1,
     padding: Spacing.three,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: Spacing.two,
-    marginBottom: Spacing.two,
+    gap: Spacing.three,
   },
+  iconeType: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  etiquette: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginTop: 2,
+  },
+  vide: { alignItems: 'center', gap: Spacing.two, marginTop: Spacing.six },
 });
